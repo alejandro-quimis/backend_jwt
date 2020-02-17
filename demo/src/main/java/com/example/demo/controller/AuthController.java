@@ -30,10 +30,11 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
 @RequestMapping("/api/auth")
-//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 public class AuthController {
     static String jwt;
     @Autowired
@@ -113,25 +114,10 @@ public class AuthController {
         System.out.println(authentication.isAuthenticated());*/
         SecurityContextHolder.getContext().setAuthentication(authentication);
         jwt = jwtProvider.generateToken(authentication);
-        //System.out.println("----->"+jwt);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        /*System.out.println("----->"+userDetails.toString());
-        System.out.println(userDetails.getAuthorities());
-        System.out.println(userDetails.getUsername());
-        System.out.println(userDetails.getPassword());
-        System.out.println(userDetails.isAccountNonExpired());
-        System.out.println(userDetails.isAccountNonLocked());
-        System.out.println(userDetails.isCredentialsNonExpired());
-        System.out.println(userDetails.isEnabled());*/
         JwtDTO jwtDTO = new JwtDTO(jwt, userDetails.getUsername(), userDetails.getAuthorities());
-
-        /*System.out.println("----->"+ jwtDTO.toString());
-        System.out.println(jwtDTO.getAuthorities());
-        System.out.println(jwtDTO.getBearer());*/
-        //agregar a la bd
         System.out.println(jwtDTO.getNombreUsuario());
         //agregar a la bd
-        System.out.println(jwtDTO.getToken());
 
         Persistencia p = new Persistencia();
         p.setEstado('a');
@@ -139,14 +125,6 @@ public class AuthController {
         p.setToken(jwtDTO.getToken());
         p.setNombreusuario(jwtDTO.getNombreUsuario());
         persistent.save(p);
-        //persistent.findByToken("ddd");
-        /*Persistencia p = new Persistencia(
-                'a',
-                jwtDTO.getToken(),
-                usu.getId(),
-                new Date()
-        );
-        persistent.save(p);*/
         return new ResponseEntity<JwtDTO>(jwtDTO, HttpStatus.OK);
     }
 }

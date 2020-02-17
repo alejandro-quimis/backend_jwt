@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8100")
 @RequestMapping("api/producto")
+@CrossOrigin(origins = "*")
 public class ProductoC extends ControladorGenerico<Producto> {
 
     public ProductoC(ProductoR dao) {

@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8100")
 @RequestMapping("api/compras")
+@CrossOrigin(origins = "*")
 public class CompraC <COmpras> {
     @Autowired
     private CompraR dao;
