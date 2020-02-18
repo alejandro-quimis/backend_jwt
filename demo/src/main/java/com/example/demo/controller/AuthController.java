@@ -21,11 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashSet;
@@ -37,6 +33,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin(origins = "*")
 public class AuthController {
     static String jwt;
+
     @Autowired
     PersistentRepository persistent;
     @Autowired
@@ -54,6 +51,12 @@ public class AuthController {
     @Autowired
     JwtProvider jwtProvider;
 
+    @PostMapping("/logout")
+    public ResponseEntity<JwtDTO> logout(){
+        Persistencia p = persistent.findByToken(jwt);;
+        persistent.save(p);
+        return new ResponseEntity("logout completo", HttpStatus.OK);
+    }
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevo(@Valid @RequestBody NuevoUsuario nuevoUsuario, BindingResult bindingResult){
         if(bindingResult.hasErrors())
@@ -102,29 +105,19 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginUsuario.getNombreUsuario(), loginUsuario.getPassword())
         );
-        /*SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtProvider.generateToken(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        JwtDTO jwtDTO = new JwtDTO(jwt, userDetails.getUsername(), userDetails.getAuthorities());*/
-        /*System.out.println("----->"+authentication.toString());
-        System.out.println(authentication.getAuthorities());
-        System.out.println(authentication.getCredentials());
-        System.out.println(authentication.getDetails());
-        System.out.println(authentication.getPrincipal());
-        System.out.println(authentication.isAuthenticated());*/
         SecurityContextHolder.getContext().setAuthentication(authentication);
         jwt = jwtProvider.generateToken(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JwtDTO jwtDTO = new JwtDTO(jwt, userDetails.getUsername(), userDetails.getAuthorities());
-        System.out.println(jwtDTO.getNombreUsuario());
         //agregar a la bd
-
-        Persistencia p = new Persistencia();
-        p.setEstado('a');
-        p.setFecha(new Date());
-        p.setToken(jwtDTO.getToken());
-        p.setNombreusuario(jwtDTO.getNombreUsuario());
-        persistent.save(p);
+        if(!jwt.isEmpty()) {
+            Persistencia p = new Persistencia();
+            p.setEstado('a');
+            p.setFecha(new Date());
+            p.setToken(jwtDTO.getToken());
+            p.setNombreusuario(jwtDTO.getNombreUsuario());
+            persistent.save(p);
+        }
         return new ResponseEntity<JwtDTO>(jwtDTO, HttpStatus.OK);
     }
 }
